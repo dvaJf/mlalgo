@@ -1,17 +1,25 @@
 import numpy as np
 
-def detect(df, n_sigma=3.0,frequency=1):
-    x = df["x"].to_numpy()
+def detect(df, window=None, n_sigma=2.5):
     y = df["y"].to_numpy()
-    offset = y.mean()
+    n = len(y)
+    
+    if window is None:
+        window = max(20, n // 100)
+    
+    anomalies = np.zeros(n, dtype=bool)
+    
+    for i in range(n):
+        start = max(0, i - window // 2)
+        end = min(n, i + window // 2 + 1)
 
-    A = np.column_stack([np.sin(frequency * x), np.cos(frequency * x)])
-    coeffs, _, _, _ = np.linalg.lstsq(A, y - offset, rcond=None)
-    phase = np.arctan2(coeffs[1], coeffs[0])
-    amplitude = np.sqrt(coeffs[0]**2 + coeffs[1]**2)
-
-    fitted = amplitude * np.sin(frequency * x + phase) + offset
-    residuals = y - fitted
-    threshold = n_sigma * residuals.std()
-
-    return np.abs(residuals) > threshold
+        local = y[start:end]
+        local_avg = np.mean(local)
+        local_std = np.std(local)
+        
+        if local_std > 0:
+            z_score = abs(y[i] - local_avg) / local_std
+            if z_score > n_sigma:
+                anomalies[i] = True
+    
+    return anomalies
