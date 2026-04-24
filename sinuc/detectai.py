@@ -32,7 +32,6 @@ def detect_ml(df):
         n_estimators=400,
         max_samples=256,
         max_features=0.8,
-        contamination="auto",
         bootstrap=True,
         random_state=42,
         n_jobs=-1
