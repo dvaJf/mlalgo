@@ -1,4 +1,3 @@
-# mlalgo / sinuc
 
 Репозиторий с примерами детекции аномалий во временных рядах на синтетических синусоидальных данных.
 
@@ -45,8 +44,6 @@ python create_dataset.py
 
 ```bash
 python test.py
-# или
-python test_detect.py
 ```
 
 ### 3. Запуск ML-детектора
