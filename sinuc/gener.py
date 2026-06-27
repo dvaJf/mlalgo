@@ -6,6 +6,8 @@ class SineGenerator:
     """
     Генератор синтетических временных рядов на основе синусоиды с шумом и точечными аномалиями.
 
+    Параметры
+    ----------
     noise : float
         Стандартное отклонение нормального шума, накладываемого на сигнал.
     n_points : int
@@ -22,10 +24,15 @@ class SineGenerator:
         Начальное значение аргумента x.
     end : float
         Конечное значение аргумента x.
+    seed : int | None
+        Seed для генератора случайных чисел. Если задан, результаты воспроизводимы.
     """
 
-    def __init__(self, noise=0.1, n_points=300, anomaly_count=5, anomaly_scale=3.0,
-                 amplitude=1, frequency=1, start=0, end=4 * np.pi):
+    def __init__(self, noise: float = 0.1, n_points: int = 300,
+                 anomaly_count: int = 5, anomaly_scale: float = 3.0,
+                 amplitude: float = 1.0, frequency: float = 1.0,
+                 start: float = 0.0, end: float = 4 * np.pi,
+                 seed: int | None = None):
         # Инициализация параметров генерации
         self.noise = noise
         self.anomaly_count = anomaly_count
@@ -35,9 +42,10 @@ class SineGenerator:
         self.start = start
         self.end = end
         self.n_points = n_points
-        self.df = None
+        self.seed = seed
+        self.df: pd.DataFrame | None = None
 
-    def generate(self):
+    def generate(self) -> pd.DataFrame:
         """
         Генерирует временной ряд и сохраняет результат в self.df.
 
@@ -48,21 +56,29 @@ class SineGenerator:
         4. Случайным образом выбирает anomaly_count точек и смещает их
            на ±anomaly_scale (симулируя точечные аномалии).
         5. Формирует DataFrame с флагом is_anomaly.
+
+        Возвращает
+        ----------
+        pandas.DataFrame
+            DataFrame с колонками 'x', 'y', 'is_anomaly'.
         """
+        # Фиксация seed для воспроизводимости (если задан)
+        rng = np.random.default_rng(self.seed)
+
         # Равномерная сетка по оси X
         x = np.linspace(self.start, self.end, self.n_points)
 
         # Гауссов шум с нулевым средним и заданным стандартным отклонением
-        noise = np.random.normal(0, self.noise, size=len(x))
+        noise = rng.normal(0, self.noise, size=len(x))
 
         # Базовый сигнал: синусоида + шум
         y = self.amplitude * np.sin(self.frequency * x) + noise
 
         # Случайный выбор индексов для аномалий (без повторений)
-        anomal = np.random.choice(len(x), size=self.anomaly_count, replace=False)
+        anomal = rng.choice(len(x), size=self.anomaly_count, replace=False)
 
         # Смещение аномальных точек: случайный знак ±1 * anomaly_scale
-        anomal_val = y[anomal] + np.random.choice([-1, 1], size=self.anomaly_count) * self.anomaly_scale
+        anomal_val = y[anomal] + rng.choice([-1, 1], size=self.anomaly_count) * self.anomaly_scale
 
         # Создание DataFrame с чистыми данными
         self.df = pd.DataFrame({'x': x, 'y': y})
@@ -71,3 +87,5 @@ class SineGenerator:
         # Запись аномальных значений и установка флага
         self.df.loc[anomal, 'y'] = anomal_val
         self.df.loc[anomal, 'is_anomaly'] = True
+
+        return self.df
