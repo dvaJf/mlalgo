@@ -140,7 +140,7 @@ with st.sidebar:
         with col_s:
             start = st.number_input("Начало", value=0.0, step=1.0, format="%.1f")
         with col_e:
-            end = st.number_input("Конец", value=25, step=1.0, format="%.1f")
+            end = st.number_input("Конец", value=25.0, step=1.0, format="%.1f")
 
         # Параметры аномалий
         st.markdown("### Параметры аномалий")
