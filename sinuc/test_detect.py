@@ -140,7 +140,7 @@ with st.sidebar:
         with col_s:
             start = st.number_input("Начало", value=0.0, step=1.0, format="%.1f")
         with col_e:
-            end = st.number_input("Конец", value=8*np.pi, step=1.0, format="%.1f")
+            end = st.number_input("Конец", value=25, step=1.0, format="%.1f")
 
         # Параметры аномалий
         st.markdown("### Параметры аномалий")
@@ -292,7 +292,7 @@ else:
 if show_stat:
     with col1:
         fig1, ax1 = plt.subplots(figsize=(10, 4.5))
-        _build_chart(ax1, "Статистический метод (Z-score + MAD)", anomalies_stat, "Найдено (Z-score)")
+        _build_chart(ax1, "Статистический метод (Z-score)", anomalies_stat, "Найдено (Z-score)")
         st.pyplot(fig1, transparent=True)
         plt.close(fig1)
 
