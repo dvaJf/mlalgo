@@ -3,7 +3,6 @@ import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import RobustScaler
 
-
 def _compute_features(x: np.ndarray, y: np.ndarray) -> dict[str, np.ndarray]:
     """
     Вычисляет инженерные признаки, которые стабильно работают на ЛЮБЫХ формах сигнала.
@@ -43,7 +42,7 @@ def _compute_features(x: np.ndarray, y: np.ndarray) -> dict[str, np.ndarray]:
     return features
 
 
-def detect_ml(df: pd.DataFrame, contamination: float | None = None) -> np.ndarray:
+def detect_ml(df: pd.DataFrame, contamination: float | None = None, return_details: bool = False) -> np.ndarray | tuple[np.ndarray, dict]:
     """
     ML-детектор аномалий на основе Isolation Forest.
 
@@ -121,5 +120,8 @@ def detect_ml(df: pd.DataFrame, contamination: float | None = None) -> np.ndarra
             threshold = np.percentile(scores, 5)
 
     anomalies = scores <= threshold
+
+    if return_details:
+        return anomalies, {'scores': scores, 'threshold': threshold}
 
     return anomalies

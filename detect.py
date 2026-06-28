@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def detect(df: pd.DataFrame, window: int | None = None, n_sigma: float = 3.0) -> np.ndarray:
+def detect(df: pd.DataFrame, window: int | None = None, n_sigma: float = 3.0, return_details: bool = False) -> np.ndarray | tuple[np.ndarray, dict]:
     """
     Статистический детектор аномалий на основе медианного Z-score (MAD).
 
@@ -64,6 +64,11 @@ def detect(df: pd.DataFrame, window: int | None = None, n_sigma: float = 3.0) ->
     
     # Точка считается аномалией, если медианный Z-score превышает порог
     anomalies = (mad_z > n_sigma).to_numpy()
+
+    if return_details:
+        upper = rolling_median + mad_std_clipped * n_sigma
+        lower = rolling_median - mad_std_clipped * n_sigma
+        return anomalies, {'upper': upper, 'lower': lower, 'median': rolling_median}
 
     return anomalies
 

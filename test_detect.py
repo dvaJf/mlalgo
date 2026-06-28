@@ -237,13 +237,37 @@ else:
 show_stat = method in ["Оба метода", "Статистический (Z-score)"]
 show_ml = method in ["Оба метода", "ML (Isolation Forest)"]
 
-anomalies_stat = detect(df) if show_stat else None
-anomalies_ml = detect_ml(df) if show_ml else None
+anomalies_stat, details_stat = detect(df, return_details=True) if show_stat else (None, None)
+anomalies_ml, details_ml = detect_ml(df, return_details=True) if show_ml else (None, None)
 
-def _build_chart_plotly(title, detected, label):
+def _build_chart_plotly(title, detected, label, method_type=None, details=None):
     """Строит интерактивный график временного ряда с отмеченными аномалиями."""
     fig = go.Figure()
     
+    if method_type == "stat" and details is not None:
+        fig.add_trace(go.Scatter(
+            x=df['x'], y=details['lower'],
+            mode='lines',
+            line=dict(width=0),
+            showlegend=False,
+            hoverinfo='skip'
+        ))
+        fig.add_trace(go.Scatter(
+            x=df['x'], y=details['upper'],
+            mode='lines',
+            fill='tonexty',
+            fillcolor='rgba(255, 255, 255, 0.1)',
+            line=dict(width=0),
+            name='Доверительный интервал',
+            hoverinfo='skip'
+        ))
+        fig.add_trace(go.Scatter(
+            x=df['x'], y=details['median'],
+            mode='lines',
+            line=dict(color='rgba(255, 255, 255, 0.3)', width=1, dash='dash'),
+            name='Медиана'
+        ))
+
     # Сигнал
     fig.add_trace(go.Scatter(
         x=df['x'], y=df['y'],
@@ -261,40 +285,78 @@ def _build_chart_plotly(title, detected, label):
             y=df.loc[df['is_anomaly'], 'y'],
             mode='markers',
             name='Истинные аномалии',
-            marker=dict(color='#e74c3c', size=8, symbol='circle'),
+            marker=dict(color='#e74c3c', size=5, symbol='circle'),
             opacity=0.9,
             hoverinfo='x+y'
         ))
         
     # Найденные алгоритмом
     if detected is not None and detected.any():
-        fig.add_trace(go.Scatter(
-            x=df.loc[detected, 'x'], 
-            y=df.loc[detected, 'y'],
-            mode='markers',
-            name=label,
-            marker=dict(color='#3498db', size=10, symbol='x', line=dict(width=2, color='#3498db')),
-            opacity=1.0,
-            hoverinfo='x+y'
-        ))
-    
+        if method_type == "ml" and details is not None:
+            # Для ML отрисовываем красивый цветовой маппинг
+            scores = details['scores']
+            threshold = details['threshold']
+            
+            # Нормализация скоров для цвета
+            norm_scores = (scores - scores.min()) / (scores.max() - scores.min() + 1e-9)
+            
+            custom_colorscale = [
+                [0.0, 'rgba(255, 50, 50, 1.0)'],    # Аномалия - яркий красный
+                [0.5, 'rgba(255, 165, 0, 0.8)'],    # Переходная зона - оранжевый
+                [1.0, 'rgba(46, 204, 113, 0.05)']   # Норма - почти прозрачный зеленый
+            ]
+            
+            fig.add_trace(go.Scatter(
+                x=df['x'], 
+                y=df['y'],
+                mode='markers',
+                name='Уровень уверенности',
+                marker=dict(
+                    size=5,
+                    color=norm_scores,
+                    colorscale=custom_colorscale,
+                    showscale=True,
+                    colorbar=dict(
+                        title="Score", 
+                        thickness=10, 
+                        len=0.5, 
+                        y=0.5,
+                        tickfont=dict(color='#a0a0b0')
+                    )
+                ),
+                hovertemplate='Score: %{customdata:.3f}<extra></extra>',
+                customdata=scores
+            ))
+            
+            # Рисуем обычные крестики для подтвержденных аномалий (как в stat методе)
+            fig.add_trace(go.Scatter(
+                x=df.loc[detected, 'x'], 
+                y=df.loc[detected, 'y'],
+                mode='markers',
+                name=label,
+                marker=dict(color='#3498db', size=10, symbol='x', line=dict(width=2, color='#3498db')),
+                opacity=1.0,
+                hoverinfo='x+y'
+            ))
+        else:
+            fig.add_trace(go.Scatter(
+                x=df.loc[detected, 'x'], 
+                y=df.loc[detected, 'y'],
+                mode='markers',
+                name=label,
+                marker=dict(color='#3498db', size=10, symbol='x', line=dict(width=2, color='#3498db')),
+                opacity=1.0,
+                hoverinfo='x+y'
+            ))
+
+    fig.update_xaxes(title_text="x", gridcolor='rgba(37, 37, 58, 0.5)', zerolinecolor='rgba(37, 37, 58, 0.5)')
+    fig.update_yaxes(title_text="y", gridcolor='rgba(37, 37, 58, 0.5)', zerolinecolor='rgba(37, 37, 58, 0.5)')
+
     fig.update_layout(
         title=dict(text=title, font=dict(color="#ffffff", size=16)),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color="#ffffff"),
-        xaxis=dict(
-            title="x", 
-            gridcolor='rgba(37, 37, 58, 0.5)', 
-            zerolinecolor='rgba(37, 37, 58, 0.5)',
-            showgrid=True
-        ),
-        yaxis=dict(
-            title="y", 
-            gridcolor='rgba(37, 37, 58, 0.5)', 
-            zerolinecolor='rgba(37, 37, 58, 0.5)',
-            showgrid=True
-        ),
         legend=dict(
             bgcolor='rgba(26, 26, 46, 0.8)',
             bordercolor='#35354a',
@@ -321,12 +383,12 @@ else:
 
 if show_stat:
     with col1:
-        fig1 = _build_chart_plotly("Статистический метод (Z-score)", anomalies_stat, "Найдено")
+        fig1 = _build_chart_plotly("Статистический метод (Z-score)", anomalies_stat, "Найдено", method_type="stat", details=details_stat)
         st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
 
 if show_ml:
     with col2:
-        fig2 = _build_chart_plotly("Isolation Forest", anomalies_ml, "Найдено")
+        fig2 = _build_chart_plotly("Isolation Forest", anomalies_ml, "Найдено", method_type="ml", details=details_ml)
         st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
 
 
