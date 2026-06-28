@@ -132,7 +132,7 @@ with st.sidebar:
 
         # Параметры сигнала
         st.markdown("### Параметры сигнала")
-        noise = st.slider("Шум (std)", 0.01, 1.0, 0.1, 0.01, format="%.2f")
+        noise = st.slider("Шум", 0.01, 1.0, 0.1, 0.01, format="%.2f")
         n_points = st.slider("Количество точек", 100, 5000, 500, 50)
         amplitude = st.slider("Амплитуда", 0.1, 5.0, 1.0, 0.1, format="%.1f")
         frequency = st.slider("Частота", 1, 10, 1, 1)
@@ -140,11 +140,11 @@ with st.sidebar:
         with col_s:
             start = st.number_input("Начало", value=0.0, step=1.0, format="%.1f")
         with col_e:
-            end = st.number_input("Конец", value=25.0, step=1.0, format="%.1f")
+            end = st.number_input("Конец", value=35.0, step=1.0, format="%.1f")
 
         # Параметры аномалий
         st.markdown("### Параметры аномалий")
-        anomaly_count = st.slider("Количество", 1, 200, 15, 1)
+        anomaly_count = st.slider("Количество", 10, 200, 15, 1)
         anomaly_scale = st.slider("Амплитуда", 0.5, 10.0, 3.0, 0.1, format="%.1f",
                                   key="anomaly_scale_slider")
 
@@ -162,12 +162,12 @@ with st.sidebar:
     st.markdown("### Метод детекции")
     method = st.radio(
         "Метод",
-        ["Оба метода", "Статистический (Z-score)", "ML (Isolation Forest)"],
+        ["Оба метода", "Статистический", "ML"],
         label_visibility="collapsed"
     )
 
     st.markdown("---")
-    generate_btn = st.button("Сгенерировать данные", use_container_width=True)
+    generate_btn = st.button("Сгенерировать данные", width='stretch')
 
 
 # Подготовка данных
@@ -324,8 +324,8 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None):
                         tickfont=dict(color='#a0a0b0')
                     )
                 ),
-                hovertemplate='Score: %{customdata:.3f}<extra></extra>',
-                customdata=scores
+                hovertemplate='Уверенность: %{customdata:.2f}<extra></extra>',
+                customdata=norm_scores
             ))
             
             # Рисуем обычные крестики для подтвержденных аномалий (как в stat методе)
@@ -384,12 +384,12 @@ else:
 if show_stat:
     with col1:
         fig1 = _build_chart_plotly("Статистический метод (Z-score)", anomalies_stat, "Найдено", method_type="stat", details=details_stat)
-        st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig1, width='stretch', config={'displayModeBar': False})
 
 if show_ml:
     with col2:
-        fig2 = _build_chart_plotly("Isolation Forest", anomalies_ml, "Найдено", method_type="ml", details=details_ml)
-        st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
+        fig2 = _build_chart_plotly("Метод ML (Isolation Forest)", anomalies_ml, "Найдено", method_type="ml", details=details_ml)
+        st.plotly_chart(fig2, width='stretch', config={'displayModeBar': False})
 
 
 # Метрики качества
