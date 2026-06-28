@@ -4,7 +4,7 @@ from gener import SineGenerator, SIGNAL_TYPES
 from detect import detect
 from detectai import detect_ml
 from metrics import compute_metrics
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import streamlit as st
 
 # Конфигурация страницы
@@ -240,45 +240,75 @@ show_ml = method in ["Оба метода", "ML (Isolation Forest)"]
 anomalies_stat = detect(df) if show_stat else None
 anomalies_ml = detect_ml(df) if show_ml else None
 
-# Стиль matplotlib
-plt.rcParams.update({
-    "figure.facecolor": "none",
-    "axes.facecolor": "none",
-    "text.color": "#a0a0c0",
-    "axes.labelcolor": "#a0a0c0",
-    "xtick.color": "#707090",
-    "ytick.color": "#707090",
-    "axes.edgecolor": "#35354a",
-    "grid.color": "#25253a",
-    "grid.alpha": 0.5,
-    "grid.linestyle": "--",
-    "font.size": 10,
-    "legend.facecolor": "#1a1a2e",
-    "legend.edgecolor": "#35354a",
-})
-
-
-def _build_chart(ax, title, detected, label):
-    """Строит график временного ряда с отмеченными аномалиями."""
-    ax.set_title(title, color="#c8c8e0", fontsize=12, fontweight=600, pad=12)
-    ax.plot(df['x'], df['y'], color='#2ecc71', alpha=0.5, linewidth=1.2, label="Сигнал")
-
-    # Истинные аномалии (если есть разметка)
+def _build_chart_plotly(title, detected, label):
+    """Строит интерактивный график временного ряда с отмеченными аномалиями."""
+    fig = go.Figure()
+    
+    # Сигнал
+    fig.add_trace(go.Scatter(
+        x=df['x'], y=df['y'],
+        mode='lines',
+        name='Сигнал',
+        line=dict(color='#2ecc71', width=1.5),
+        opacity=0.7,
+        hoverinfo='x+y'
+    ))
+    
+    # Истинные аномалии
     if has_true_labels and df['is_anomaly'].any():
-        ax.scatter(
-            df.loc[df['is_anomaly'], 'x'], df.loc[df['is_anomaly'], 'y'],
-            color='#e74c3c', zorder=4, label='Истинные аномалии', s=40, alpha=0.85, edgecolors='none'
-        )
-
+        fig.add_trace(go.Scatter(
+            x=df.loc[df['is_anomaly'], 'x'], 
+            y=df.loc[df['is_anomaly'], 'y'],
+            mode='markers',
+            name='Истинные аномалии',
+            marker=dict(color='#e74c3c', size=8, symbol='circle'),
+            opacity=0.9,
+            hoverinfo='x+y'
+        ))
+        
     # Найденные алгоритмом
-    ax.scatter(
-        df.loc[detected, 'x'], df.loc[detected, 'y'],
-        color='#3498db', zorder=5, label=label, marker='x', s=60, linewidth=2
+    if detected is not None and detected.any():
+        fig.add_trace(go.Scatter(
+            x=df.loc[detected, 'x'], 
+            y=df.loc[detected, 'y'],
+            mode='markers',
+            name=label,
+            marker=dict(color='#3498db', size=10, symbol='x', line=dict(width=2, color='#3498db')),
+            opacity=1.0,
+            hoverinfo='x+y'
+        ))
+    
+    fig.update_layout(
+        title=dict(text=title, font=dict(color="#ffffff", size=16)),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color="#ffffff"),
+        xaxis=dict(
+            title="x", 
+            gridcolor='rgba(37, 37, 58, 0.5)', 
+            zerolinecolor='rgba(37, 37, 58, 0.5)',
+            showgrid=True
+        ),
+        yaxis=dict(
+            title="y", 
+            gridcolor='rgba(37, 37, 58, 0.5)', 
+            zerolinecolor='rgba(37, 37, 58, 0.5)',
+            showgrid=True
+        ),
+        legend=dict(
+            bgcolor='rgba(26, 26, 46, 0.8)',
+            bordercolor='#35354a',
+            borderwidth=1,
+            orientation="h",
+            yanchor="top",
+            y=-0.15,
+            xanchor="center",
+            x=0.5
+        ),
+        margin=dict(l=40, r=40, t=60, b=80),
+        hovermode="x unified"
     )
-    ax.legend(fontsize=8, loc='upper right')
-    ax.grid(True)
-    ax.set_xlabel("x")
-    ax.set_ylabel("y")
+    return fig
 
 
 # Графики
@@ -291,17 +321,13 @@ else:
 
 if show_stat:
     with col1:
-        fig1, ax1 = plt.subplots(figsize=(10, 4.5))
-        _build_chart(ax1, "Статистический метод (Z-score)", anomalies_stat, "Найдено (Z-score)")
-        st.pyplot(fig1, transparent=True)
-        plt.close(fig1)
+        fig1 = _build_chart_plotly("Статистический метод (Z-score)", anomalies_stat, "Найдено (Z-score)")
+        st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
 
 if show_ml:
     with col2:
-        fig2, ax2 = plt.subplots(figsize=(10, 4.5))
-        _build_chart(ax2, "Isolation Forest", anomalies_ml, "Найдено (ML)")
-        st.pyplot(fig2, transparent=True)
-        plt.close(fig2)
+        fig2 = _build_chart_plotly("Isolation Forest", anomalies_ml, "Найдено (ML)")
+        st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
 
 
 # Метрики качества
