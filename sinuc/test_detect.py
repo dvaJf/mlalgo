@@ -321,12 +321,12 @@ else:
 
 if show_stat:
     with col1:
-        fig1 = _build_chart_plotly("Статистический метод (Z-score)", anomalies_stat, "Найдено (Z-score)")
+        fig1 = _build_chart_plotly("Статистический метод (Z-score)", anomalies_stat, "Найдено")
         st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
 
 if show_ml:
     with col2:
-        fig2 = _build_chart_plotly("Isolation Forest", anomalies_ml, "Найдено (ML)")
+        fig2 = _build_chart_plotly("Isolation Forest", anomalies_ml, "Найдено")
         st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
 
 
