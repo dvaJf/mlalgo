@@ -166,6 +166,10 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
+    # Тумблер для доверительного интервала медианы
+    show_ci = st.toggle("Доп информация", value=False,
+                        help="Показать доверительный интервал и уровень уверенности")
+
     st.markdown("---")
     generate_btn = st.button("Сгенерировать данные", width='stretch')
 
@@ -240,11 +244,11 @@ show_ml = method in ["Оба метода", "ML (Isolation Forest)"]
 anomalies_stat, details_stat = detect(df, return_details=True) if show_stat else (None, None)
 anomalies_ml, details_ml = detect_ml(df, return_details=True) if show_ml else (None, None)
 
-def _build_chart_plotly(title, detected, label, method_type=None, details=None):
+def _build_chart_plotly(title, detected, label, method_type=None, details=None, show_ci=False):
     """Строит интерактивный график временного ряда с отмеченными аномалиями."""
     fig = go.Figure()
     
-    if method_type == "stat" and details is not None:
+    if method_type == "stat" and details is not None and show_ci:
         fig.add_trace(go.Scatter(
             x=df['x'], y=details['lower'],
             mode='lines',
@@ -293,42 +297,43 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None):
     # Найденные алгоритмом
     if detected is not None and detected.any():
         if method_type == "ml" and details is not None:
-            # Для ML отрисовываем красивый цветовой маппинг
             scores = details['scores']
             threshold = details['threshold']
             
-            # Нормализация скоров для цвета
-            norm_scores = (scores - scores.min()) / (scores.max() - scores.min() + 1e-9)
+            if show_ci:
+                # Для ML отрисовываем красивый цветовой маппинг
+                # Нормализация скоров для цвета
+                norm_scores = (scores - scores.min()) / (scores.max() - scores.min() + 1e-9)
+                
+                custom_colorscale = [
+                    [0.0, 'rgba(255, 50, 50, 1.0)'],    # Аномалия - яркий красный
+                    [0.5, 'rgba(255, 165, 0, 0.8)'],    # Переходная зона - оранжевый
+                    [1.0, 'rgba(46, 204, 113, 0.05)']   # Норма - почти прозрачный зеленый
+                ]
+                
+                fig.add_trace(go.Scatter(
+                    x=df['x'], 
+                    y=df['y'],
+                    mode='markers',
+                    name='Уровень уверенности',
+                    marker=dict(
+                        size=5,
+                        color=norm_scores,
+                        colorscale=custom_colorscale,
+                        showscale=True,
+                        colorbar=dict(
+                            title="Score", 
+                            thickness=10, 
+                            len=0.5, 
+                            y=0.5,
+                            tickfont=dict(color='#a0a0b0')
+                        )
+                    ),
+                    hovertemplate='Уверенность: %{customdata:.2f}<extra></extra>',
+                    customdata=norm_scores
+                ))
             
-            custom_colorscale = [
-                [0.0, 'rgba(255, 50, 50, 1.0)'],    # Аномалия - яркий красный
-                [0.5, 'rgba(255, 165, 0, 0.8)'],    # Переходная зона - оранжевый
-                [1.0, 'rgba(46, 204, 113, 0.05)']   # Норма - почти прозрачный зеленый
-            ]
-            
-            fig.add_trace(go.Scatter(
-                x=df['x'], 
-                y=df['y'],
-                mode='markers',
-                name='Уровень уверенности',
-                marker=dict(
-                    size=5,
-                    color=norm_scores,
-                    colorscale=custom_colorscale,
-                    showscale=True,
-                    colorbar=dict(
-                        title="Score", 
-                        thickness=10, 
-                        len=0.5, 
-                        y=0.5,
-                        tickfont=dict(color='#a0a0b0')
-                    )
-                ),
-                hovertemplate='Уверенность: %{customdata:.2f}<extra></extra>',
-                customdata=norm_scores
-            ))
-            
-            # Рисуем обычные крестики для подтвержденных аномалий (как в stat методе)
+            # Рисуем обычные крестики для подтвержденных аномалий
             fig.add_trace(go.Scatter(
                 x=df.loc[detected, 'x'], 
                 y=df.loc[detected, 'y'],
@@ -383,12 +388,12 @@ else:
 
 if show_stat:
     with col1:
-        fig1 = _build_chart_plotly("Статистический метод (Z-score)", anomalies_stat, "Найдено", method_type="stat", details=details_stat)
+        fig1 = _build_chart_plotly("Статистический метод (Z-score)", anomalies_stat, "Найдено", method_type="stat", details=details_stat, show_ci=show_ci)
         st.plotly_chart(fig1, width='stretch', config={'displayModeBar': False})
 
 if show_ml:
     with col2:
-        fig2 = _build_chart_plotly("Метод ML (Isolation Forest)", anomalies_ml, "Найдено", method_type="ml", details=details_ml)
+        fig2 = _build_chart_plotly("Метод ML (Isolation Forest)", anomalies_ml, "Найдено", method_type="ml", details=details_ml, show_ci=show_ci)
         st.plotly_chart(fig2, width='stretch', config={'displayModeBar': False})
 
 
