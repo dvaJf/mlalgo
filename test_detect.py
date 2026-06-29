@@ -18,79 +18,80 @@ st.set_page_config(
 st.markdown("""
 <style>
     .stApp {
-        background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+        background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
     }
     .main-title {
         text-align: center;
         font-size: 2.4rem;
         font-weight: 700;
-        color: #e0e0e0;
+        color: #1e3a8a;
         letter-spacing: 0.02em;
         margin-bottom: 0.2rem;
     }
     .main-subtitle {
         text-align: center;
         font-size: 1.05rem;
-        color: #7a7a9e;
+        color: #3b82f6;
         margin-bottom: 2rem;
         font-weight: 400;
     }
     div[data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: #ffffff;
+        border: 1px solid rgba(59, 130, 246, 0.2);
         border-radius: 12px;
         padding: 16px 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     div[data-testid="stMetric"] label {
-        color: #9e9ebb !important;
+        color: #64748b !important;
         font-size: 0.82rem !important;
         text-transform: uppercase;
         letter-spacing: 0.06em;
     }
     div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
-        color: #e8e8f0 !important;
+        color: #1e293b !important;
         font-size: 1.8rem !important;
         font-weight: 600;
     }
     section[data-testid="stSidebar"] {
-        background: rgba(15, 15, 26, 0.95) !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        background: #f8fafc !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
     }
     section[data-testid="stSidebar"] .stMarkdown h3 {
-        color: #c0c0d8;
+        color: #334155;
         font-size: 0.85rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-top: 1.2rem;
     }
     section[data-testid="stSidebar"] button[kind="secondary"] {
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
-        color: #0f0f1a !important;
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        color: #ffffff !important;
         border: none !important;
         font-weight: 600 !important;
         border-radius: 8px !important;
     }
     .section-header {
-        color: #c8c8e0;
+        color: #1e3a8a;
         font-size: 1.15rem;
         font-weight: 600;
-        border-bottom: 2px solid rgba(46, 204, 113, 0.3);
+        border-bottom: 2px solid rgba(249, 115, 22, 0.4);
         padding-bottom: 8px;
         margin-bottom: 16px;
         margin-top: 8px;
     }
     .formula-hint {
-        color: #6a6a8e;
+        color: #64748b;
         font-size: 0.8rem;
         line-height: 1.4;
     }
     .upload-info {
-        color: #8a8aaa;
+        color: #64748b;
         font-size: 0.85rem;
         padding: 8px 12px;
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(59, 130, 246, 0.05);
         border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.1);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -260,7 +261,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
             x=df['x'], y=details['upper'],
             mode='lines',
             fill='tonexty',
-            fillcolor='rgba(255, 255, 255, 0.1)',
+            fillcolor='rgba(59, 130, 246, 0.1)',
             line=dict(width=0),
             name='Доверительный интервал',
             hoverinfo='skip'
@@ -268,7 +269,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
         fig.add_trace(go.Scatter(
             x=df['x'], y=details['median'],
             mode='lines',
-            line=dict(color='rgba(255, 255, 255, 0.3)', width=1, dash='dash'),
+            line=dict(color='rgba(30, 58, 138, 0.3)', width=1, dash='dash'),
             name='Медиана'
         ))
 
@@ -277,7 +278,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
         x=df['x'], y=df['y'],
         mode='lines',
         name='Сигнал',
-        line=dict(color='#2ecc71', width=1.5),
+        line=dict(color='#3b82f6', width=1.5),
         opacity=0.7,
         hoverinfo='x+y'
     ))
@@ -289,7 +290,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
             y=df.loc[df['is_anomaly'], 'y'],
             mode='markers',
             name='Истинные аномалии',
-            marker=dict(color='#e74c3c', size=5, symbol='circle'),
+            marker=dict(color='#f97316', size=5, symbol='circle'),
             opacity=0.9,
             hoverinfo='x+y'
         ))
@@ -306,9 +307,9 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
                 norm_scores = (scores - scores.min()) / (scores.max() - scores.min() + 1e-9)
                 
                 custom_colorscale = [
-                    [0.0, 'rgba(255, 50, 50, 1.0)'],    # Аномалия - яркий красный
-                    [0.5, 'rgba(255, 165, 0, 0.8)'],    # Переходная зона - оранжевый
-                    [1.0, 'rgba(46, 204, 113, 0.05)']   # Норма - почти прозрачный зеленый
+                    [0.0, 'rgba(249, 115, 22, 1.0)'],    # Аномалия - яркий оранжевый
+                    [0.5, 'rgba(251, 146, 60, 0.8)'],    # Переходная зона - светлый оранжевый
+                    [1.0, 'rgba(59, 130, 246, 0.1)']     # Норма - полупрозрачный синий
                 ]
                 
                 fig.add_trace(go.Scatter(
@@ -326,7 +327,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
                             thickness=10, 
                             len=0.5, 
                             y=0.5,
-                            tickfont=dict(color='#a0a0b0')
+                            tickfont=dict(color='#64748b')
                         )
                     ),
                     hovertemplate='Уверенность: %{customdata:.2f}<extra></extra>',
@@ -339,7 +340,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
                 y=df.loc[detected, 'y'],
                 mode='markers',
                 name=label,
-                marker=dict(color='#3498db', size=10, symbol='x', line=dict(width=2, color='#3498db')),
+                marker=dict(color='#f97316', size=10, symbol='x', line=dict(width=2, color='#f97316')),
                 opacity=1.0,
                 hoverinfo='x+y'
             ))
@@ -354,17 +355,17 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
                 hoverinfo='x+y'
             ))
 
-    fig.update_xaxes(title_text="x", gridcolor='rgba(37, 37, 58, 0.5)', zerolinecolor='rgba(37, 37, 58, 0.5)')
-    fig.update_yaxes(title_text="y", gridcolor='rgba(37, 37, 58, 0.5)', zerolinecolor='rgba(37, 37, 58, 0.5)')
+    fig.update_xaxes(title_text="x", gridcolor='rgba(226, 232, 240, 1.0)', zerolinecolor='rgba(226, 232, 240, 1.0)')
+    fig.update_yaxes(title_text="y", gridcolor='rgba(226, 232, 240, 1.0)', zerolinecolor='rgba(226, 232, 240, 1.0)')
 
     fig.update_layout(
-        title=dict(text=title, font=dict(color="#ffffff", size=16)),
+        title=dict(text=title, font=dict(color="#1e3a8a", size=16)),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color="#ffffff"),
+        font=dict(color="#334155"),
         legend=dict(
-            bgcolor='rgba(26, 26, 46, 0.8)',
-            bordercolor='#35354a',
+            bgcolor='rgba(255, 255, 255, 0.8)',
+            bordercolor='#e2e8f0',
             borderwidth=1,
             orientation="h",
             yanchor="top",
