@@ -14,87 +14,48 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Тема
+is_light_theme = st.sidebar.toggle(" Светлая тема", value=False)
+
 # Кастомные стили
-st.markdown("""
-<style>
-    .stApp {
-        background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
-    }
-    .main-title {
-        text-align: center;
-        font-size: 2.4rem;
-        font-weight: 700;
-        color: #1e3a8a;
-        letter-spacing: 0.02em;
-        margin-bottom: 0.2rem;
-    }
-    .main-subtitle {
-        text-align: center;
-        font-size: 1.05rem;
-        color: #3b82f6;
-        margin-bottom: 2rem;
-        font-weight: 400;
-    }
-    div[data-testid="stMetric"] {
-        background: #ffffff;
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: 12px;
-        padding: 16px 20px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-    div[data-testid="stMetric"] label {
-        color: #64748b !important;
-        font-size: 0.82rem !important;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-    }
-    div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
-        color: #1e293b !important;
-        font-size: 1.8rem !important;
-        font-weight: 600;
-    }
-    section[data-testid="stSidebar"] {
-        background: #f8fafc !important;
-        border-right: 1px solid rgba(0, 0, 0, 0.05);
-    }
-    section[data-testid="stSidebar"] .stMarkdown h3 {
-        color: #334155;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-top: 1.2rem;
-    }
-    section[data-testid="stSidebar"] button[kind="secondary"] {
-        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
-        color: #ffffff !important;
-        border: none !important;
-        font-weight: 600 !important;
-        border-radius: 8px !important;
-    }
-    .section-header {
-        color: #1e3a8a;
-        font-size: 1.15rem;
-        font-weight: 600;
-        border-bottom: 2px solid rgba(249, 115, 22, 0.4);
-        padding-bottom: 8px;
-        margin-bottom: 16px;
-        margin-top: 8px;
-    }
-    .formula-hint {
-        color: #64748b;
-        font-size: 0.8rem;
-        line-height: 1.4;
-    }
-    .upload-info {
-        color: #64748b;
-        font-size: 0.85rem;
-        padding: 8px 12px;
-        background: rgba(59, 130, 246, 0.05);
-        border-radius: 8px;
-        border: 1px solid rgba(59, 130, 246, 0.1);
-    }
-</style>
-""", unsafe_allow_html=True)
+if is_light_theme:
+    st.markdown("""
+    <style>
+        .stApp { background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%); }
+        p, span, label, h1, h2, h3, h4, h5, h6, li { color: #0f172a !important; }
+        .main-title { text-align: center; font-size: 2.4rem; font-weight: 700; color: #1e3a8a !important; letter-spacing: 0.02em; margin-bottom: 0.2rem; }
+        .main-subtitle { text-align: center; font-size: 1.05rem; color: #3b82f6 !important; margin-bottom: 2rem; font-weight: 400; }
+        div[data-testid="stMetric"] { background: #ffffff; border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        div[data-testid="stMetric"] label, div[data-testid="stMetric"] label p { color: #64748b !important; font-size: 0.82rem !important; text-transform: uppercase; letter-spacing: 0.06em; }
+        div[data-testid="stMetric"] div[data-testid="stMetricValue"], div[data-testid="stMetricValue"] div { color: #1e293b !important; font-size: 1.8rem !important; font-weight: 600; }
+        section[data-testid="stSidebar"] { background: #f8fafc !important; border-right: 1px solid rgba(0, 0, 0, 0.05); }
+        section[data-testid="stSidebar"] .stMarkdown h3, section[data-testid="stSidebar"] .stMarkdown h3 p { color: #334155 !important; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1.2rem; }
+        button[kind="secondary"] { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important; color: #ffffff !important; border: none !important; font-weight: 600 !important; border-radius: 8px !important; }
+        button[kind="secondary"] p, button[kind="secondary"] span { color: #ffffff !important; }
+        .section-header, .section-header p { color: #1e3a8a !important; font-size: 1.15rem; font-weight: 600; border-bottom: 2px solid rgba(249, 115, 22, 0.4); padding-bottom: 8px; margin-bottom: 16px; margin-top: 8px; }
+        .formula-hint, .formula-hint p { color: #64748b !important; font-size: 0.8rem; line-height: 1.4; }
+        .upload-info, .upload-info p { color: #64748b !important; font-size: 0.85rem; padding: 8px 12px; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.1); }
+        input, select, textarea, div[data-baseweb="select"] > div, div[data-baseweb="base-input"] { background-color: #ffffff !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+        div[data-baseweb="radio"] div { color: #0f172a !important; }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+        .stApp { background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%); }
+        .main-title { text-align: center; font-size: 2.4rem; font-weight: 700; color: #e0e0e0; letter-spacing: 0.02em; margin-bottom: 0.2rem; }
+        .main-subtitle { text-align: center; font-size: 1.05rem; color: #7a7a9e; margin-bottom: 2rem; font-weight: 400; }
+        div[data-testid="stMetric"] { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px 20px; box-shadow: none; }
+        div[data-testid="stMetric"] label { color: #9e9ebb !important; font-size: 0.82rem !important; text-transform: uppercase; letter-spacing: 0.06em; }
+        div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #e8e8f0 !important; font-size: 1.8rem !important; font-weight: 600; }
+        section[data-testid="stSidebar"] { background: rgba(15, 15, 26, 0.95) !important; border-right: 1px solid rgba(255, 255, 255, 0.06); }
+        section[data-testid="stSidebar"] .stMarkdown h3 { color: #c0c0d8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1.2rem; }
+        section[data-testid="stSidebar"] button[kind="secondary"] { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important; color: #0f0f1a !important; border: none !important; font-weight: 600 !important; border-radius: 8px !important; }
+        .section-header { color: #c8c8e0; font-size: 1.15rem; font-weight: 600; border-bottom: 2px solid rgba(46, 204, 113, 0.3); padding-bottom: 8px; margin-bottom: 16px; margin-top: 8px; }
+        .formula-hint { color: #6a6a8e; font-size: 0.8rem; line-height: 1.4; }
+        .upload-info { color: #8a8aaa; font-size: 0.85rem; padding: 8px 12px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Заголовок
 st.markdown('<div class="main-title">Anomaly Detection</div>', unsafe_allow_html=True)
@@ -239,8 +200,8 @@ else:
 
 
 # Детекция
-show_stat = method in ["Оба метода", "Статистический (Z-score)"]
-show_ml = method in ["Оба метода", "ML (Isolation Forest)"]
+show_stat = method in ["Оба метода", "Статистический"]
+show_ml = method in ["Оба метода", "ML"]
 
 anomalies_stat, details_stat = detect(df, return_details=True) if show_stat else (None, None)
 anomalies_ml, details_ml = detect_ml(df, return_details=True) if show_ml else (None, None)
@@ -249,6 +210,44 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
     """Строит интерактивный график временного ряда с отмеченными аномалиями."""
     fig = go.Figure()
     
+    # Цвета в зависимости от темы
+    if is_light_theme:
+        c_ci = 'rgba(59, 130, 246, 0.1)'
+        c_median = 'rgba(30, 58, 138, 0.3)'
+        c_signal = '#3b82f6'
+        c_true = '#f97316'
+        c_ml_scale = [
+            [0.0, 'rgba(249, 115, 22, 1.0)'],
+            [0.5, 'rgba(251, 146, 60, 0.8)'],
+            [1.0, 'rgba(59, 130, 246, 0.1)']
+        ]
+        c_ml_tick = '#64748b'
+        c_detected = '#f97316'
+        c_detected_other = '#3498db'
+        c_grid = 'rgba(226, 232, 240, 1.0)'
+        c_title = '#1e3a8a'
+        c_font = '#334155'
+        c_legend_bg = 'rgba(255, 255, 255, 0.8)'
+        c_legend_border = '#e2e8f0'
+    else:
+        c_ci = 'rgba(255, 255, 255, 0.1)'
+        c_median = 'rgba(255, 255, 255, 0.3)'
+        c_signal = '#2ecc71'
+        c_true = '#e74c3c'
+        c_ml_scale = [
+            [0.0, 'rgba(255, 50, 50, 1.0)'],
+            [0.5, 'rgba(255, 165, 0, 0.8)'],
+            [1.0, 'rgba(46, 204, 113, 0.05)']
+        ]
+        c_ml_tick = '#a0a0b0'
+        c_detected = '#3498db'
+        c_detected_other = '#3498db'
+        c_grid = 'rgba(37, 37, 58, 0.5)'
+        c_title = '#ffffff'
+        c_font = '#ffffff'
+        c_legend_bg = 'rgba(26, 26, 46, 0.8)'
+        c_legend_border = '#35354a'
+
     if method_type == "stat" and details is not None and show_ci:
         fig.add_trace(go.Scatter(
             x=df['x'], y=details['lower'],
@@ -261,7 +260,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
             x=df['x'], y=details['upper'],
             mode='lines',
             fill='tonexty',
-            fillcolor='rgba(59, 130, 246, 0.1)',
+            fillcolor=c_ci,
             line=dict(width=0),
             name='Доверительный интервал',
             hoverinfo='skip'
@@ -269,7 +268,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
         fig.add_trace(go.Scatter(
             x=df['x'], y=details['median'],
             mode='lines',
-            line=dict(color='rgba(30, 58, 138, 0.3)', width=1, dash='dash'),
+            line=dict(color=c_median, width=1, dash='dash'),
             name='Медиана'
         ))
 
@@ -278,7 +277,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
         x=df['x'], y=df['y'],
         mode='lines',
         name='Сигнал',
-        line=dict(color='#3b82f6', width=1.5),
+        line=dict(color=c_signal, width=1.5),
         opacity=0.7,
         hoverinfo='x+y'
     ))
@@ -290,7 +289,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
             y=df.loc[df['is_anomaly'], 'y'],
             mode='markers',
             name='Истинные аномалии',
-            marker=dict(color='#f97316', size=5, symbol='circle'),
+            marker=dict(color=c_true, size=5, symbol='circle'),
             opacity=0.9,
             hoverinfo='x+y'
         ))
@@ -302,15 +301,8 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
             threshold = details['threshold']
             
             if show_ci:
-                # Для ML отрисовываем красивый цветовой маппинг
                 # Нормализация скоров для цвета
                 norm_scores = (scores - scores.min()) / (scores.max() - scores.min() + 1e-9)
-                
-                custom_colorscale = [
-                    [0.0, 'rgba(249, 115, 22, 1.0)'],    # Аномалия - яркий оранжевый
-                    [0.5, 'rgba(251, 146, 60, 0.8)'],    # Переходная зона - светлый оранжевый
-                    [1.0, 'rgba(59, 130, 246, 0.1)']     # Норма - полупрозрачный синий
-                ]
                 
                 fig.add_trace(go.Scatter(
                     x=df['x'], 
@@ -320,14 +312,14 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
                     marker=dict(
                         size=5,
                         color=norm_scores,
-                        colorscale=custom_colorscale,
+                        colorscale=c_ml_scale,
                         showscale=True,
                         colorbar=dict(
                             title="Score", 
                             thickness=10, 
                             len=0.5, 
                             y=0.5,
-                            tickfont=dict(color='#64748b')
+                            tickfont=dict(color=c_ml_tick)
                         )
                     ),
                     hovertemplate='Уверенность: %{customdata:.2f}<extra></extra>',
@@ -340,7 +332,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
                 y=df.loc[detected, 'y'],
                 mode='markers',
                 name=label,
-                marker=dict(color='#f97316', size=10, symbol='x', line=dict(width=2, color='#f97316')),
+                marker=dict(color=c_detected, size=10, symbol='x', line=dict(width=2, color=c_detected)),
                 opacity=1.0,
                 hoverinfo='x+y'
             ))
@@ -350,22 +342,22 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
                 y=df.loc[detected, 'y'],
                 mode='markers',
                 name=label,
-                marker=dict(color='#3498db', size=10, symbol='x', line=dict(width=2, color='#3498db')),
+                marker=dict(color=c_detected_other, size=10, symbol='x', line=dict(width=2, color=c_detected_other)),
                 opacity=1.0,
                 hoverinfo='x+y'
             ))
 
-    fig.update_xaxes(title_text="x", gridcolor='rgba(226, 232, 240, 1.0)', zerolinecolor='rgba(226, 232, 240, 1.0)')
-    fig.update_yaxes(title_text="y", gridcolor='rgba(226, 232, 240, 1.0)', zerolinecolor='rgba(226, 232, 240, 1.0)')
+    fig.update_xaxes(title_text="x", gridcolor=c_grid, zerolinecolor=c_grid)
+    fig.update_yaxes(title_text="y", gridcolor=c_grid, zerolinecolor=c_grid)
 
     fig.update_layout(
-        title=dict(text=title, font=dict(color="#1e3a8a", size=16)),
+        title=dict(text=title, font=dict(color=c_title, size=16)),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color="#334155"),
+        font=dict(color=c_font),
         legend=dict(
-            bgcolor='rgba(255, 255, 255, 0.8)',
-            bordercolor='#e2e8f0',
+            bgcolor=c_legend_bg,
+            bordercolor=c_legend_border,
             borderwidth=1,
             orientation="h",
             yanchor="top",
