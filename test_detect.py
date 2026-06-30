@@ -356,6 +356,7 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color=c_font),
         legend=dict(
+            font=dict(color=c_font),
             bgcolor=c_legend_bg,
             bordercolor=c_legend_border,
             borderwidth=1,
@@ -382,12 +383,12 @@ else:
 if show_stat:
     with col1:
         fig1 = _build_chart_plotly("Статистический метод (Z-score)", anomalies_stat, "Найдено", method_type="stat", details=details_stat, show_ci=show_ci)
-        st.plotly_chart(fig1, width='stretch', config={'displayModeBar': False})
+        st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False}, theme=None)
 
 if show_ml:
     with col2:
         fig2 = _build_chart_plotly("Метод ML (Isolation Forest)", anomalies_ml, "Найдено", method_type="ml", details=details_ml, show_ci=show_ci)
-        st.plotly_chart(fig2, width='stretch', config={'displayModeBar': False})
+        st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False}, theme=None)
 
 
 # Метрики качества
