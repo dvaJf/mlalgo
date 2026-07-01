@@ -7,17 +7,16 @@ from metrics import compute_metrics
 import plotly.graph_objects as go
 import streamlit as st
 
-# Конфигурация страницы
+# Конфиг
 st.set_page_config(
     page_title="Anomaly Detection — Sinuc",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Тема
 is_light_theme = st.sidebar.toggle(" Светлая тема", value=False)
 
-# Кастомные стили
+# Стили
 if is_light_theme:
     st.markdown("""
     <style>
@@ -57,23 +56,18 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
-# Заголовок
 st.markdown('<div class="main-title">Anomaly Detection</div>', unsafe_allow_html=True)
 st.markdown('<div class="main-subtitle">Поиск аномалий в числовых последовательностях</div>', unsafe_allow_html=True)
 
-# Боковая панель
+# Меню
 with st.sidebar:
 
-    # Источник данных
-    st.markdown("### Источник данных")
     data_source = st.radio(
         "Выберите источник",
         ["Генерация сигнала", "Загрузка CSV"],
-        label_visibility="collapsed"
-    )
+        )
 
     if data_source == "Генерация сигнала":
-        # Тип сигнала
         st.markdown("### Тип сигнала")
         signal_label = st.selectbox(
             "Форма волны",
@@ -82,7 +76,7 @@ with st.sidebar:
         )
         signal_type = SIGNAL_TYPES[signal_label]
 
-        # Поле для пользовательской формулы
+        # Формула
         formula = None
         if signal_type == "custom":
             formula = st.text_input(
@@ -92,7 +86,6 @@ with st.sidebar:
             )
 
 
-        # Параметры сигнала
         st.markdown("### Параметры сигнала")
         noise = st.slider("Шум", 0.01, 1.0, 0.1, 0.01, format="%.2f")
         n_points = st.slider("Количество точек", 100, 5000, 500, 50)
@@ -104,14 +97,12 @@ with st.sidebar:
         with col_e:
             end = st.number_input("Конец", value=35.0, step=1.0, format="%.1f")
 
-        # Параметры аномалий
         st.markdown("### Параметры аномалий")
         anomaly_count = st.slider("Количество", 10, 200, 15, 1)
         anomaly_scale = st.slider("Амплитуда", 0.5, 10.0, 3.0, 0.1, format="%.1f",
                                   key="anomaly_scale_slider")
 
     else:
-        # Загрузка CSV
         st.markdown("### Загрузка файла")
         uploaded_file = st.file_uploader(
             "CSV файл",
@@ -120,7 +111,6 @@ with st.sidebar:
         )
 
 
-    # Метод детекции
     st.markdown("### Метод детекции")
     method = st.radio(
         "Метод",
@@ -128,7 +118,6 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-    # Тумблер для доверительного интервала медианы
     show_ci = st.toggle("Доп информация", value=False,
                         help="Показать доверительный интервал и уровень уверенности")
 
@@ -136,7 +125,7 @@ with st.sidebar:
     generate_btn = st.button("Сгенерировать данные", width='stretch')
 
 
-# Подготовка данных
+# Данные
 df = None
 has_true_labels = False
 
@@ -159,7 +148,6 @@ if data_source == "Генерация сигнала":
     has_true_labels = True
 
 else:
-    # Загрузка CSV
     if uploaded_file is not None:
         try:
             raw = pd.read_csv(uploaded_file)
@@ -183,7 +171,6 @@ else:
                 df['is_anomaly'] = False
                 has_true_labels = False
 
-            # Удаление строк с NaN
             df = df.dropna().reset_index(drop=True)
 
             st.session_state['sg_df'] = df.copy()
@@ -207,10 +194,10 @@ anomalies_stat, details_stat = detect(df, return_details=True) if show_stat else
 anomalies_ml, details_ml = detect_ml(df, return_details=True) if show_ml else (None, None)
 
 def _build_chart_plotly(title, detected, label, method_type=None, details=None, show_ci=False):
-    """Строит интерактивный график временного ряда с отмеченными аномалиями."""
+    """График."""
     fig = go.Figure()
     
-    # Цвета в зависимости от темы
+    # Цвета
     if is_light_theme:
         c_ci = 'rgba(59, 130, 246, 0.1)'
         c_median = 'rgba(30, 58, 138, 0.3)'
@@ -272,7 +259,6 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
             name='Медиана'
         ))
 
-    # Сигнал
     fig.add_trace(go.Scatter(
         x=df['x'], y=df['y'],
         mode='lines',
@@ -282,7 +268,6 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
         hoverinfo='x+y'
     ))
     
-    # Истинные аномалии
     if has_true_labels and df['is_anomaly'].any():
         fig.add_trace(go.Scatter(
             x=df.loc[df['is_anomaly'], 'x'], 
@@ -294,7 +279,6 @@ def _build_chart_plotly(title, detected, label, method_type=None, details=None, 
             hoverinfo='x+y'
         ))
         
-    # Найденные алгоритмом
     if detected is not None and detected.any():
         if method_type == "ml" and details is not None:
             scores = details['scores']
@@ -391,7 +375,7 @@ if show_ml:
         st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False}, theme=None)
 
 
-# Метрики качества
+# Метрики
 st.markdown('<div class="section-header">Метрики качества</div>', unsafe_allow_html=True)
 
 if has_true_labels:
@@ -422,7 +406,6 @@ if has_true_labels:
         c3.metric("F1-score", f"{m_ml['f1']:.4f}")
         c4.metric("Найдено / Истинных", f"{int(anomalies_ml.sum())} / {int(true_anomalies.sum())}")
 else:
-    # Нет истинных меток — показываем только количество найденных
     if show_stat and show_ml:
         c1, c2, c3 = st.columns(3)
         c1.metric("Точек в ряде", len(df))
